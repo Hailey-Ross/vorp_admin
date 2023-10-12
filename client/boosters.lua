@@ -20,7 +20,7 @@ function GODmode()
         SetPlayerInvincible(player, true)
         Citizen.InvokeNative(0xFD6943B6DF77E449, player, false) -- set ped can be lassoed
 
-        if Config.BoosterLogs.GodMode then -- if nil dont send
+        if Config.BoosterLogs.GodMode then                      -- if nil dont send
             TriggerServerEvent("vorp_admin:logs", Config.BoosterLogs.GodMode, _U("titlebooster"),
                 _U("usedgod"))
         end
@@ -93,7 +93,7 @@ function InfiAmmo()
             SetPedInfiniteAmmo(player, true, weaponHash)
             if Config.BoosterLogs.InfiniteAmmo then
                 TriggerServerEvent("vorp_admin:logs", Config.BoosterLogs.InfiniteAmmo, _U("titlebooster")
-                    , _U("usedinfinitammo"))
+                , _U("usedinfinitammo"))
             end
         end
     else
@@ -107,17 +107,24 @@ function Boost()
     MenuData.CloseAll()
 
     local elements = {
-        { label = _U("godMode"),      value = 'god',          desc = _U("godMode_desc") },
-        { label = _U("noclipMode"), value = 'noclip',
+        {
+            label = _U("godMode"),
+            value = 'god',
+            desc = _U("godMode_desc")
+        },
+        {
+            label = _U("noclipMode"),
+            value = 'noclip',
             desc = "<span>" ..
-            _U("move") .. "</span><br><span>" .. _U("speedMode") .. "</span><br>" .. _U("Cammode") .. "" },
+                _U("move") .. "</span><br><span>" .. _U("speedMode") .. "</span><br>" .. _U("Cammode") .. ""
+        },
         { label = _U("goldenCores"),  value = 'goldcores',    desc = _U("goldCores_desc") },
         { label = _U("infiniteammo"), value = 'infiniteammo', desc = _U("infammo_desc") },
         { label = _U("spawnwagon"),   value = 'spawnwagon',   desc = _U("spawnwagon_desc") },
         { label = _U("spawnhorse"),   value = 'spawnhorse',   desc = _U("spawnhorse_desc") },
         { label = _U("selfheal"),     value = 'selfheal',     desc = _U("selfheal_desc") },
         { label = _U("selfrevive"),   value = 'selfrevive',   desc = _U("selfrevive_desc") },
-        { label = _U("invis"), value = 'invisibility', desc = _U('invisnotif') },
+        { label = _U("invis"),        value = 'invisibility', desc = _U('invisnotif') },
         --{ label = "players blip map", value = 'playerblip', desc = "show players blip on the map" }, todo
         --{ label = "players id", value = 'showid', desc = "show players id over head", }, todo
     }
@@ -147,12 +154,12 @@ function Boost()
                 TriggerServerEvent("vorp_admin:opneStaffMenu", "vorp.staff.Invisibility")
                 Wait(100)
                 if AdminAllowed then
-                    if invis == false then --if invis is false then
+                    if invis == false then                     --if invis is false then
                         SetEntityVisible(PlayerPedId(), false) --sets you invisible
-                        invis = true --changes the variable to true so if you hit the button again it runs the elseif statment below
-                    elseif invis == true then --if invis variable is true then
-                        SetEntityVisible(PlayerPedId(), true) --sets you too visible
-                        invis = false --changes variable back to false so the next time this is ran it sets you back invisible
+                        invis = true                           --changes the variable to true so if you hit the button again it runs the elseif statment below
+                    elseif invis == true then                  --if invis variable is true then
+                        SetEntityVisible(PlayerPedId(), true)  --sets you too visible
+                        invis = false                          --changes variable back to false so the next time this is ran it sets you back invisible
                     end
                 else
                     TriggerEvent("vorp:TipRight", _U("noperms"), 4000)
@@ -199,12 +206,11 @@ function Boost()
                 TriggerServerEvent("vorp_admin:opneStaffMenu", "vorp.staff.SelfRevive")
                 Wait(100)
                 if AdminAllowed then
-                    TriggerEvent('vorp:resurrectPlayer')
+                    TriggerServerEvent('vorp_admin:ReviveSelf', "vorp.staff.SelfRevive")
 
                     if Config.BoosterLogs.SelfRevive then
-                        TriggerServerEvent("vorp_admin:logs",
-                            Config.BoosterLogs.SelfRevive
-                            , _U("titlebooster"), _U("usedrevive"))
+                        TriggerServerEvent("vorp_admin:logs", Config.BoosterLogs.SelfRevive, _U("titlebooster"),
+                            _U("usedrevive"))
                     end
                 else
                     TriggerEvent("vorp:TipRight", _U("noperms"), 4000)
@@ -218,8 +224,13 @@ function Boost()
                             Config.BoosterLogs.SelfHeal
                             , _U("titlebooster"), _U("usedheal"))
                     end
-                    TriggerEvent('vorp:heal')
+                    TriggerServerEvent('vorp_admin:HealSelf', "vorp.staff.SelfHeal")
                     Config.Heal.Players()
+                    local horse = GetMount(PlayerPedId())
+                    if horse ~= 0 then
+                        Citizen.InvokeNative(0xC6258F41D86676E0, horse, 0, 600) -- Health
+                        Citizen.InvokeNative(0xC6258F41D86676E0, horse, 1, 600) -- Stamina
+                    end
                 else
                     TriggerEvent("vorp:TipRight", _U("noperms"), 4000)
                 end
@@ -229,16 +240,16 @@ function Boost()
                 Wait(100)
                 if AdminAllowed then
                     local myInput = {
-                        type = "enableinput", -- dont touch
+                        type = "enableinput",                                                -- dont touch
                         inputType = "input",
-                        button = _U("confirm"), -- button name
-                        placeholder = _U("inserthashmodel"), --placeholdername
-                        style = "block", --- dont touch
+                        button = _U("confirm"),                                              -- button name
+                        placeholder = _U("inserthashmodel"),                                 --placeholdername
+                        style = "block",                                                     --- dont touch
                         attributes = {
-                            inputHeader = _U("spawnhorse"), -- header
-                            type = "text", -- inputype text, number,date.etc if number comment out the pattern
-                            pattern = "[A-Za-z0-9_ \\-]{5,60}", -- regular expression validated for only numbers "[0-9]", for letters only [A-Za-z]+   with charecter limit  [A-Za-z]{5,20}     with chareceter limit and numbers [A-Za-z0-9]{5,}
-                            title = "wrong syntax", -- if input doesnt match show this message
+                            inputHeader = _U("spawnhorse"),                                  -- header
+                            type = "text",                                                   -- inputype text, number,date.etc if number comment out the pattern
+                            pattern = "[A-Za-z0-9_ \\-]{5,60}",                              -- regular expression validated for only numbers "[0-9]", for letters only [A-Za-z]+   with charecter limit  [A-Za-z]{5,20}     with chareceter limit and numbers [A-Za-z0-9]{5,}
+                            title = "wrong syntax",                                          -- if input doesnt match show this message
                             style = "border-radius: 10px; backgRound-color: ; border:none;", -- style  the inptup
                         }
                     }
@@ -272,16 +283,16 @@ function Boost()
                 Wait(100)
                 if AdminAllowed then
                     local myInput = {
-                        type = "enableinput", -- dont touch
+                        type = "enableinput",                                                -- dont touch
                         inputType = "input",
-                        button = _U("confirm"), -- button name
-                        placeholder = _U("insertmodel"), --placeholdername
-                        style = "block", --- dont touch
+                        button = _U("confirm"),                                              -- button name
+                        placeholder = _U("insertmodel"),                                     --placeholdername
+                        style = "block",                                                     --- dont touch
                         attributes = {
-                            inputHeader = _U("SpawnWagon"), -- header
-                            type = "text", -- inputype text, number,date.etc if number comment out the pattern
-                            pattern = "[A-Za-z0-9_ \\-]{5,60}", -- regular expression validated for only numbers "[0-9]", for letters only [A-Za-z]+   with charecter limit  [A-Za-z]{5,20}     with chareceter limit and numbers [A-Za-z0-9]{5,}
-                            title = "wrong syntax", -- if input doesnt match show this message
+                            inputHeader = _U("SpawnWagon"),                                  -- header
+                            type = "text",                                                   -- inputype text, number,date.etc if number comment out the pattern
+                            pattern = "[A-Za-z0-9_ \\-]{5,60}",                              -- regular expression validated for only numbers "[0-9]", for letters only [A-Za-z]+   with charecter limit  [A-Za-z]{5,20}     with chareceter limit and numbers [A-Za-z0-9]{5,}
+                            title = "wrong syntax",                                          -- if input doesnt match show this message
                             style = "border-radius: 10px; backgRound-color: ; border:none;", -- style  the inptup
                         }
                     }
@@ -302,7 +313,7 @@ function Boost()
                             SetPedIntoVehicle(player, wagon, -1)
                             if Config.BoosterLogs.SelfSpawnWagon then
                                 TriggerServerEvent("vorp_admin:logs", Config.BoosterLogs.SelfSpawnWagon
-                                    , _U("titlebooster"), _U("spawned") .. wagon)
+                                , _U("titlebooster"), _U("spawned") .. wagon)
                             end
                         else
                             TriggerEvent('vorp:TipRight', _U("advalue"), 3000)
@@ -327,18 +338,17 @@ end
 
 local Prompt1
 local Prompt2
-local Prompt3
 local Prompt4
-local Prompt5
 local Prompt6
 local PromptGroup = GetRandomIntInRange(0, 0xffffff)
 
 
 --PROMPTS
 CreateThread(function()
-    local str = "DOWN"
+    local str = _U("promptdown") .. "/" .. _U("promptup")
     Prompt1 = PromptRegisterBegin()
     PromptSetControlAction(Prompt1, Config.Controls.goDown)
+    PromptSetControlAction(Prompt1, Config.Controls.goUp)
     str = CreateVarString(10, 'LITERAL_STRING', str)
     PromptSetText(Prompt1, str)
     PromptSetEnabled(Prompt1, 1)
@@ -348,7 +358,7 @@ CreateThread(function()
     Citizen.InvokeNative(0xC5F428EE08FA7F2C, Prompt1, true)
     PromptRegisterEnd(Prompt1)
 
-    local str = "SPEED"
+    local str = _U("promptspeed")
     Prompt2 = PromptRegisterBegin()
     PromptSetControlAction(Prompt2, Config.Controls.changeSpeed) -- shift
     str = CreateVarString(10, 'LITERAL_STRING', str)
@@ -360,21 +370,10 @@ CreateThread(function()
     Citizen.InvokeNative(0xC5F428EE08FA7F2C, Prompt2, true)
     PromptRegisterEnd(Prompt2)
 
-    local str = "FOWARD"
-    Prompt3 = PromptRegisterBegin()
-    PromptSetControlAction(Prompt3, Config.Controls.goForward)
-    str = CreateVarString(10, 'LITERAL_STRING', str)
-    PromptSetText(Prompt3, str)
-    PromptSetEnabled(Prompt3, 1)
-    PromptSetVisible(Prompt3, 1)
-    PromptSetStandardMode(Prompt3, 1)
-    PromptSetGroup(Prompt3, PromptGroup)
-    Citizen.InvokeNative(0xC5F428EE08FA7F2C, Prompt3, true)
-    PromptRegisterEnd(Prompt3)
-
-    local str = "BACKWARD"
+    local str = _U("promptbackward") .. "/" .. _U("promptforward")
     Prompt4 = PromptRegisterBegin()
     PromptSetControlAction(Prompt4, Config.Controls.goBackward)
+    PromptSetControlAction(Prompt4, Config.Controls.goForward)
     str = CreateVarString(10, 'LITERAL_STRING', str)
     PromptSetText(Prompt4, str)
     PromptSetEnabled(Prompt4, 1)
@@ -384,20 +383,7 @@ CreateThread(function()
     Citizen.InvokeNative(0xC5F428EE08FA7F2C, Prompt4, true)
     PromptRegisterEnd(Prompt4)
 
-    local str = "UP"
-    Prompt5 = PromptRegisterBegin()
-    PromptSetControlAction(Prompt5, Config.Controls.goUp)
-    str = CreateVarString(10, 'LITERAL_STRING', str)
-    PromptSetText(Prompt5, str)
-    PromptSetEnabled(Prompt5, 1)
-    PromptSetVisible(Prompt5, 1)
-    PromptSetStandardMode(Prompt5, 1)
-    PromptSetGroup(Prompt5, PromptGroup)
-    Citizen.InvokeNative(0xC5F428EE08FA7F2C, Prompt5, true)
-    PromptRegisterEnd(Prompt5)
-
-
-    local str = "Cancel"
+    local str = _U("promptcancel")
     Prompt6 = PromptRegisterBegin()
     PromptSetControlAction(Prompt6, Config.Controls.Cancel)
     str = CreateVarString(10, 'LITERAL_STRING', str)
@@ -409,6 +395,7 @@ CreateThread(function()
     Citizen.InvokeNative(0xC5F428EE08FA7F2C, Prompt6, true)
     PromptRegisterEnd(Prompt6)
 end)
+
 
 
 Citizen.CreateThread(function()
@@ -480,7 +467,7 @@ Citizen.CreateThread(function()
             if IsDisabledControlPressed(0, Config.Controls.goDown) then
                 zoff = -Config.Offsets.z
             end
-            
+
             if IsDisabledControlPressed(0, Config.Controls.Cancel) then
                 NoClipActive = false
                 break
